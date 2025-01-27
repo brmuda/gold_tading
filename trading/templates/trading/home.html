@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5>Gold Balance: <span id="goldBalance">{{ gold_balance|default:0 }}</span> grams</h5>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Buy Gold</h5>
+            </div>
+            <div class="card-body">
+                <form id="buyForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="buyAmount" class="form-label">Amount (Rial)</label>
+                        <input type="number" class="form-control" id="buyAmount" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Buy</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Sell Gold</h5>
+            </div>
+            <div class="card-body">
+                <form id="sellForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="sellGoldWeight" class="form-label">Gold Weight (grams)</label>
+                        <input type="number" step="0.0001" class="form-control" id="sellGoldWeight" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sell</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Transaction History</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Amount (Rial)</th>
+                            <th>Gold Weight (g)</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td>{{ t.id }}</td>
+                            <td>{{ t.type }}</td>
+                            <td>{{ t.amount_rial }}</td>
+                            <td>{{ t.gold_weight_gram }}</td>
+                            <td>{{ t.date }}</td>
+                            <td>{{ t.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+document.getElementById('buyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const amount = document.getElementById('buyAmount').value;
+
+    try {
+        const response = await fetch('/transactions/buy/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                amount_rial: parseInt(amount)
+            })
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            window.location.reload();
+        }
+    } catch (error) {
+        window.location.reload();
+    }
+});
+
+document.getElementById('sellForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const goldWeight = document.getElementById('sellGoldWeight').value;
+
+    try {
+        const response = await fetch('/transactions/sell/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                gold_weight_gram: parseFloat(goldWeight)
+            })
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            window.location.reload();
+        }
+    } catch (error) {
+        window.location.reload();
+    }
+});
+
+
+
+</script>
+{% endblock %}
