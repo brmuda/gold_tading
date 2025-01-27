@@ -1,4 +1,4 @@
-```markdown
+
 # Gold Trading API
 
 Django REST API for managing gold transactions with a simple web interface.
